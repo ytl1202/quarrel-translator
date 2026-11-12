@@ -15,6 +15,12 @@
 
 不用安装，不用 API，不用改代码。
 
+## 网页 Demo
+
+想先看输出长什么样，可以打开 [docs/index.html](./docs/index.html)：纯静态页面，双击就能用，内置 5 组示例（含停机情形和超 6 条追问），也能填自己的模型配置，或一键复制完整提示词去别处跑。
+
+发布到 GitHub Pages：Settings → Pages → Source 选 `main` / `/docs`。用法与注意事项见 [docs/README.md](./docs/README.md)。
+
 ## 它不会做什么
 
 - 不判断谁对谁错，不写「其实双方都有问题」，不劝和。
@@ -63,6 +69,7 @@
 | `examples/03-hard-stops.md` | 四类停机情形与统一输出 |
 | `tests/CHECKLIST.md` | 人工验收清单 |
 | `tests/cases.md` | 用例编号表，新增示例时对照 |
+| `docs/` | 纯静态网页 Demo，可直接用 GitHub Pages 发布 |
 | `CONTRIBUTING.md` | 怎么加示例、怎么改规则 |
 | `LICENSE` | MIT |
 
