@@ -1,0 +1,2 @@
+# 统一换行符，避免 Windows 下生成的 CRLF 污染 diff
+* text=auto eol=lf

@@ -1,0 +1,15 @@
+# 本仓库零依赖，仅排除系统与编辑器产生的文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+node_modules/
+.env
+.env.*
+!.env.example
