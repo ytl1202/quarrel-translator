@@ -7,7 +7,7 @@
 1. **`SYSTEM_PROMPT.md` 里的规则原文一字不动。** 规则本身要改，请单独开一个 PR，只改这一处，在描述里写明改了哪一条、为什么、哪些示例需要跟着更新。
 2. **示例里的「原话」必须能被逐字核对**，包括错别字、脏话、省略号。不要为了读起来顺而润色原话。
 3. **保持零依赖**：不引入需要安装、编译或联网才能验证的东西。验收靠人读 [CHECKLIST.md](./tests/CHECKLIST.md)；`docs/` 的网页同样不引入框架、CDN 和构建步骤。
-4. **两处副本要同步**：改规则原文要同步 `docs/data.js` 的 `FALLBACK_PROMPT`，改 `examples/` 的输出要同步 `docs/data.js` 的 `DEMOS`。页面左侧可以展开「查看 / 复制系统提示词」核对当前版本。
+4. **副本要同步**：改三份提示词（`SYSTEM_PROMPT.md` / `SCREENSHOT_PROMPT.md` / `REPLY_PROMPT.md`）要同步 `docs/data.js` 里对应的 `FALLBACK_PROMPT` / `FALLBACK_SCREENSHOT_PROMPT` / `FALLBACK_REPLY_PROMPT`；改 `examples/` 的输出要同步 `SHOT_DEMOS` / `REPLY_DEMOS`。输出区可以展开「查看 / 复制当前板块的提示词」核对版本。
 
 ## 加一个示例
 
@@ -28,8 +28,8 @@
 
 ## 提交前自检
 
-- [ ] 规则原文未被改动；如已改，`docs/data.js` 的 `FALLBACK_PROMPT` 已同步
-- [ ] 新增示例通过 CHECKLIST；如改了 `examples/` 输出，`docs/data.js` 的 `DEMOS` 已同步
+- [ ] 三份规则原文未被改动；如已改，`docs/data.js` 的对应 `FALLBACK_*` 已同步
+- [ ] 新增示例通过 CHECKLIST；如改了 `examples/` 输出，`SHOT_DEMOS` / `REPLY_DEMOS` 已同步
 - [ ] `cases.md` 有对应编号
 - [ ] 没有真实个人信息
 - [ ] 没有禁用标签、劝和空话、关系结论

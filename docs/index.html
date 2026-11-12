@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>吵架翻译器 · 演示页</title>
-<meta name="description" content="把指责翻成需求，把情绪翻成在意的东西。纯静态演示页，零依赖，不劝和，不判对错。">
+<title>吵架翻译器 · 截图分析与回复建议</title>
+<meta name="description" content="上传微信 / QQ 聊天截图，看懂两个人真正的意思；也可以贴对方刚说的话，拿到可直接发送的回复。纯静态页面，零依赖。">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,72 +12,113 @@
 
   <header class="masthead">
     <div>
-      <h1>吵架翻译器 <span>演示页</span></h1>
+      <h1>吵架翻译器 <span>聊天截图 / 对话回复</span></h1>
       <p class="tagline">把指责翻成需求，把情绪翻成在意的东西。不劝和，不判对错。</p>
     </div>
     <span class="badge">静态页面 / 零依赖</span>
   </header>
+
+  <nav class="tabs" role="tablist" aria-label="选择板块">
+    <button id="tab-shot" class="maintab active" type="button" role="tab" aria-selected="true">截图分析</button>
+    <button id="tab-reply" class="maintab" type="button" role="tab" aria-selected="false">对话回复</button>
+  </nav>
+
+  <details class="api-config" id="api-config">
+    <summary>模型接入设置（两个板块共用）</summary>
+    <div class="api-grid">
+      <div class="field">
+        <label class="field-label" for="base">Base URL</label>
+        <input id="base" type="text" placeholder="https://api.openai.com/v1" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label" for="key">API Key</label>
+        <input id="key" type="password" placeholder="只留在当前页面，不保存" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label" for="model">模型名</label>
+        <input id="model" type="text" placeholder="需支持图片输入，例如 gpt-4o-mini" autocomplete="off">
+      </div>
+    </div>
+    <p class="note warn">截图会以 base64 发往你所填的端点，先遮掉头像、昵称、手机号等敏感信息。截图分析要求模型支持图片输入（vision）；「对话回复」用普通文本模型即可。Key 只在当前页面内存，不写入本地存储；公共或共用电脑上不建议填真实 Key。浏览器直连第三方接口可能遇到跨域限制。</p>
+  </details>
 
   <main class="grid">
 
     <section class="panel" aria-labelledby="input-title">
       <div class="panel-head">
         <h2 id="input-title">输入</h2>
-        <span class="hint" id="count-hint">共 0 条消息</span>
+        <span class="hint" id="pane-hint"></span>
       </div>
 
-      <div class="field">
-        <span class="field-label">输出来源</span>
-        <div class="segmented" role="radiogroup" aria-label="输出来源">
-          <label><input type="radio" name="mode" value="demo" checked><span>内置演示</span></label>
-          <label><input type="radio" name="mode" value="api"><span>接入模型</span></label>
+      <div id="pane-shot">
+        <div class="drop" id="drop">
+          <p class="drop-title">把微信 / QQ 聊天截图拖进来，或直接 Ctrl+V 粘贴</p>
+          <label class="btn" for="file">选择图片</label>
+          <input id="file" type="file" accept="image/*" multiple hidden>
+          <p class="note">最多 4 张 · 长边压到 1600px 后发送 · 图片只发给你自己填的端点</p>
         </div>
-        <p class="note">内置演示用的是仓库里的固定示例，不会把你粘贴的内容送去翻译。</p>
-      </div>
+        <div id="thumbs" class="thumbs"></div>
 
-      <div class="field" id="sample-field">
-        <label class="field-label" for="sample">内置示例</label>
-        <select id="sample">
-          <option value="basic">基准示例（2 条）</option>
-          <option value="edge1">边界：未标说话人 / 语音转写 / 语气标记</option>
-          <option value="edge2">边界：脏话 / 非人身威胁</option>
-          <option value="six">超过 6 条消息 → 先追问</option>
-          <option value="stop">停机情形（不写具体原句）</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label class="field-label" for="chat">聊天记录</label>
-        <textarea id="chat" rows="12" spellcheck="false" placeholder="A：你从来都不回我消息，你心里根本没我。&#10;B：我上班忙，你能不能别无理取闹。&#10;&#10;（也可以直接贴没有 A / B 标签的记录，按消息顺序交替推断）"></textarea>
-        <p class="note">原文未标说话人时，按消息顺序交替推断为 A / B，并在输出开头声明。</p>
-      </div>
-
-      <div class="api-config" id="api-config" hidden>
-        <p class="api-title">模型接入（OpenAI 兼容接口）</p>
         <div class="field">
-          <label class="field-label" for="base">Base URL</label>
-          <input id="base" type="text" placeholder="https://api.openai.com/v1" autocomplete="off">
+          <label class="field-label" for="shot-note">补充给模型的话（可选）</label>
+          <textarea id="shot-note" rows="3" spellcheck="false" placeholder="例如：这是我和对方的对话，右边是我"></textarea>
         </div>
+
         <div class="field">
-          <label class="field-label" for="key">API Key</label>
-          <input id="key" type="password" placeholder="只留在当前页面，不保存" autocomplete="off">
+          <label class="field-label" for="scope">翻译范围</label>
+          <select id="scope">
+            <option value="全翻">全翻</option>
+            <option value="只翻冲突最集中的几段">只翻冲突最集中的几段</option>
+          </select>
+          <p class="note">截图常常超过 6 条，先把范围告诉模型，就不用再追问一次。</p>
         </div>
+
         <div class="field">
-          <label class="field-label" for="model">模型名</label>
-          <input id="model" type="text" placeholder="例如 gpt-4o-mini" autocomplete="off">
+          <label class="field-label" for="shot-sample">内置示例（不联网）</label>
+          <select id="shot-sample">
+            <option value="basic">基准示例（2 条）</option>
+            <option value="screenshot">聊天截图示例</option>
+            <option value="edge1">边界：未标说话人 / 语音转写 / 语气标记</option>
+            <option value="edge2">边界：脏话 / 非人身威胁</option>
+            <option value="six">超过 6 条消息 → 先追问</option>
+            <option value="stop">停机情形（不写具体原句）</option>
+          </select>
         </div>
-        <p class="note warn">浏览器直连第三方接口可能遇到跨域限制。Key 只存在当前页面内存，不写入本地存储、不发给除你所填端点外的任何地方；公共或共用电脑上不建议填真实 Key。</p>
+
+        <div class="actions">
+          <button id="shot-run" class="btn primary" type="button">分析截图</button>
+          <button id="shot-demo" class="btn" type="button">看示例输出</button>
+        </div>
       </div>
 
-      <details class="prompt-view">
-        <summary>查看 / 复制系统提示词</summary>
-        <pre id="prompt-text"></pre>
-      </details>
+      <div id="pane-reply" hidden>
+        <div class="field">
+          <label class="field-label" for="reply-input">对方刚说的话</label>
+          <textarea id="reply-input" rows="7" spellcheck="false" placeholder="把对方刚发的那句话贴进来&#10;例如：你心里根本没我，消息从来都不回。"></textarea>
+          <p class="note" id="reply-hint">0 字</p>
+        </div>
 
-      <div class="actions">
-        <button id="run" class="btn primary" type="button">生成翻译</button>
-        <button id="copy" class="btn" type="button">复制完整提示词</button>
+        <div class="field">
+          <label class="field-label" for="reply-context">我想表达什么（可选）</label>
+          <textarea id="reply-context" rows="3" spellcheck="false" placeholder="例如：我确实在忙，但不是故意不回"></textarea>
+          <p class="note">这一栏只用来贴你自己的意思，不会被当成对方说过的话。</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="reply-sample">内置示例（不联网）</label>
+          <select id="reply-sample">
+            <option value="normal">常规示例（3 条回复）</option>
+            <option value="violation">含禁止句式的输出（看校验提示）</option>
+            <option value="stop">停机情形（不写具体原句）</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button id="reply-run" class="btn primary" type="button">生成推荐回复</button>
+          <button id="reply-demo" class="btn" type="button">看示例输出</button>
+        </div>
       </div>
+
       <p class="toast" id="toast" role="status" aria-live="polite"></p>
     </section>
 
@@ -93,13 +134,20 @@
       <div class="status" id="status" role="status" aria-live="polite">就绪</div>
       <div id="fmt" class="result"></div>
       <pre id="raw" class="raw" hidden></pre>
-      <p class="footnote">页面只做展示：停机预检是本地词表兜底，词表不完整，未命中不代表安全；最终以仓库根目录的 SYSTEM_PROMPT.md 为准。可在左侧「查看 / 复制系统提示词」里核对当前使用的版本。</p>
+
+      <details class="prompt-view">
+        <summary>查看 / 复制当前板块的提示词</summary>
+        <div class="actions"><button id="copy-prompt" class="btn" type="button">复制提示词 + 当前输入</button></div>
+        <pre id="prompt-text"></pre>
+      </details>
+
+      <p class="footnote">页面只做展示：停机预检是本地词表兜底，词表不完整，未命中不代表安全；禁止句式校验也是本地检查，最终以仓库里的规则原文为准。</p>
     </section>
 
   </main>
 
   <footer class="sitefoot">
-    <span>纯静态页面，不上传聊天记录</span>
+    <span>内置示例不联网；截图只发往你所填的端点</span>
     <span>·</span>
     <span id="prompt-source">提示词来源：内置副本</span>
   </footer>
