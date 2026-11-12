@@ -13,3 +13,6 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# 工作区元数据，不进仓库
+.workbuddy/
