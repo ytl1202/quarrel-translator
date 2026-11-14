@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 先看贡献约定
+    url: https://github.com/ytl1202/quarrel-translator/blob/main/CONTRIBUTING.md
+    about: 改规则、加示例和脱敏要求都写在这里
+  - name: 在线试用网页版
+    url: https://ytl1202.github.io/quarrel-translator/app.html
+    about: 内置示例不需要 API Key；页面显示或交互问题也在这里反馈
+  - name: 项目介绍页
+    url: https://ytl1202.github.io/quarrel-translator/
+    about: 特性、隐私边界与已知限制

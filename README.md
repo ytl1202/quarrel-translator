@@ -1,6 +1,10 @@
 # 吵架翻译器
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-online-2f6f6b)](https://ytl1202.github.io/quarrel-translator/) [![License: MIT](https://img.shields.io/badge/License-MIT-9a5b2c)](./LICENSE) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-3b4a6b)](./CONTRIBUTING.md)
+
 三份可以直接复制进大模型的系统提示词：逐句翻译两个人的聊天记录、读微信 / QQ 聊天截图、给正在进行的对话推荐回复。不劝和，不判对错，只做一件事：把指责翻成需求，把情绪翻成在意的东西。
+
+*Translate blame into needs — reusable LLM prompts for chat screenshots and reply suggestions. Not mediation, not therapy.*
 
 **它是翻译器，不是调解员，也不是心理评估。**
 
@@ -13,11 +17,15 @@
 3. 正在对话、想要推荐回复：改用 [REPLY_PROMPT.md](./REPLY_PROMPT.md)。
 4. 粘贴到任意大模型的「系统提示词 / 自定义指令」位置，再把聊天记录或截图贴进去。
 
-不用安装，不用改代码。也可以直接打开 [docs/index.html](./docs/index.html) 用网页版。
+不用安装，不用改代码。也可以直接用下面这个网页版。
 
 ## 网页 Demo
 
-打开 [docs/index.html](./docs/index.html)：纯静态页面，双击就能用，两个可切换的板块。
+- **项目介绍页**：https://ytl1202.github.io/quarrel-translator/ （中英切换、明暗主题自适应）
+- **在线工具**：https://ytl1202.github.io/quarrel-translator/app.html （内置示例不需要 API Key）
+- **下载 v0.1.0 提示词包**：[Releases](https://github.com/ytl1202/quarrel-translator/releases)
+
+打开 [docs/app.html](./docs/app.html)：纯静态页面，双击就能用，两个可切换的板块。
 
 - **截图分析**：拖入 / 粘贴微信、QQ 聊天截图，由你配置的、支持图片输入的模型读图，逐句翻出两个人真正的意思。页面不做本地 OCR，截图以 base64 发往你自己填的端点。
 - **对话回复**：贴对方刚说的话（可加一句你想表达的意思），得到 3 条不同语气的回复——克制版 / 直说需求版 / 先缓一缓版，每条附一句说明、可单独复制；页面会标出违反禁止句式的地方。
@@ -76,8 +84,16 @@
 | `examples/05-reply.md` | 推荐回复示例、停机示例、禁止句式校验示例 |
 | `tests/CHECKLIST.md` | 人工验收清单 |
 | `tests/cases.md` | 用例编号表，新增示例时对照 |
-| `docs/` | 纯静态网页 Demo，可直接用 GitHub Pages 发布 |
+| `docs/index.html` | 项目落地页，中英切换 + 明暗主题自适应 |
+| `docs/app.html` | 工具页：截图分析 / 对话回复两个板块 |
+| `docs/` | 上述页面与样式、脚本、数据，可直接用 GitHub Pages 发布 |
+| `CHANGELOG.md` | 版本更新记录 |
+| `ISSUE_TEMPLATE.md` | 根目录单文件 issue 模板（GitHub 社区标准识别用） |
 | `CONTRIBUTING.md` | 怎么加示例、怎么改规则 |
+| `CODE_OF_CONDUCT.md` | 讨论与反馈的行为准则 |
+| `SECURITY.md` | 隐私边界与问题报告方式 |
+| `.github/ISSUE_TEMPLATE/` | 两类 issue 模板 |
+| `PULL_REQUEST_TEMPLATE.md` | PR 自检清单 |
 | `LICENSE` | MIT |
 
 ## 使用提示
@@ -88,7 +104,7 @@
 
 ## 贡献
 
-欢迎补充脱敏后的真实语料示例、边界用例和错别字修正。规则原文默认不动，改动方式见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+欢迎补充脱敏后的真实语料示例、边界用例和错别字修正。规则原文默认不动，改动方式见 [CONTRIBUTING.md](./CONTRIBUTING.md)；提 issue 可以直接用 [模板](./.github/ISSUE_TEMPLATE/)。
 
 ## 许可
 

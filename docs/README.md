@@ -1,8 +1,13 @@
 # 网页 Demo
 
-一个纯静态演示页，零依赖、无构建步骤。页面分两个可切换的板块，共用一个模型配置。
+`docs/` 下有两个页面，都是纯静态、零依赖、无构建步骤：
 
-## 两个板块
+| 页面 | 作用 | 线上地址 |
+| --- | --- | --- |
+| `index.html` | 项目落地页：中英切换、明暗主题自适应、特性与隐私说明 | https://ytl1202.github.io/quarrel-translator/ |
+| `app.html` | 工具页：两个可切换的板块，共用一个模型配置 | https://ytl1202.github.io/quarrel-translator/app.html |
+
+## 两个板块（工具页）
 
 | 板块 | 输入 | 输出 |
 | --- | --- | --- |
@@ -13,10 +18,10 @@
 
 ## 本地打开
 
-直接双击 `docs/index.html`（`file://` 也能用）：
+直接双击 `docs/app.html`（`file://` 也能用）看工具页；双击 `docs/index.html` 看落地页。
 
 - 两个板块都有**内置示例**，点「看示例输出」即可看到渲染效果，不需要 API、不联网。
-- 真实分析需要配好模型。在 `file://` 下浏览器跨域限制更常见，需要时在本仓库根目录跑 `python -m http.server 8000`，访问 `http://localhost:8000/docs/`。
+- 真实分析需要配好模型。在 `file://` 下浏览器跨域限制更常见，需要时在本仓库根目录跑 `python -m http.server 8000`，访问 `http://localhost:8000/docs/app.html`。
 
 ## 截图板块怎么用
 
@@ -48,13 +53,13 @@
 
 ## 发布到 GitHub Pages
 
-仓库 Settings → Pages → Source 选 **Deploy from a branch** → Branch 选 `main`、目录选 `/docs` → Save。发布后访问 `https://<用户名>.github.io/<仓库名>/`。`docs/.nojekyll` 已放好。
+仓库 Settings → Pages → Source 选 **Deploy from a branch** → Branch 选 `main`、目录选 `/docs` → Save。发布后根地址是落地页：`https://ytl1202.github.io/quarrel-translator/`，工具页在 `/app.html`。`docs/.nojekyll` 已放好。
 
 页面所有依赖都在 `docs/` 内，不引用仓库根目录文件，所以 `/docs` 发布模式下不会有坏链。
 
 ## 提示词从哪里来
 
-启动时会依次尝试读取 `../` 和 `./` 下的 `SYSTEM_PROMPT.md`、`SCREENSHOT_PROMPT.md`、`REPLY_PROMPT.md`，提取 `text` 代码块覆盖内嵌副本；读不到就用 `data.js` 里的副本。页脚显示实际来源。
+工具页启动时会依次尝试读取 `../` 和 `./` 下的 `SYSTEM_PROMPT.md`、`SCREENSHOT_PROMPT.md`、`REPLY_PROMPT.md`，提取 `text` 代码块覆盖内嵌副本；读不到就用 `data.js` 里的副本。页脚显示实际来源。
 
 在 `/docs` 发布模式下根目录的 md 不会被发布，通常显示「内置副本」。想让 Pages 自动读最新版，把三份 md 复制一份到 `docs/` 下即可。
 
@@ -70,8 +75,9 @@
 
 | 文件 | 作用 |
 | --- | --- |
-| `index.html` | 两个板块的页面结构 |
-| `style.css` | 浅色主题样式，无外部字体与 CDN |
+| `index.html` | 落地页，单文件内联样式与脚本，中英切换 + 明暗主题自适应 |
+| `app.html` | 工具页，两个板块的页面结构 |
+| `style.css` | 工具页样式，无外部字体与 CDN |
 | `data.js` | 三份提示词副本、两组内置示例、停机预检词表 |
 | `app.js` | 图片压缩与粘贴、多模态请求、输出解析渲染、禁止句式校验、复制 |
 | `.nojekyll` | 让 GitHub Pages 跳过 Jekyll |

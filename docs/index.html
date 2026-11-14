@@ -3,157 +3,233 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>吵架翻译器 · 截图分析与回复建议</title>
-<meta name="description" content="上传微信 / QQ 聊天截图，看懂两个人真正的意思；也可以贴对方刚说的话，拿到可直接发送的回复。纯静态页面，零依赖。">
-<link rel="stylesheet" href="style.css">
+<title>吵架翻译器 · Quarrel Translator</title>
+<meta name="description" content="把指责翻成需求：三份可复制的大模型提示词 + 微信/QQ 聊天截图分析与推荐回复。Translate blame into needs.">
+<style>
+:root {
+  --bg: #f7f6f3; --card: #ffffff; --line: #e4e1db; --soft: #f1efe8;
+  --ink: #23211e; --ink2: #57534c; --ink3: #8a857c;
+  --accent: #2f6f6b; --accent-ink: #ffffff; --warm: #9a5b2c; --stop: #9a3b2b;
+  --shadow: 0 1px 2px rgba(30, 25, 15, .05);
+}
+html[data-theme="dark"] {
+  --bg: #15161a; --card: #1e2026; --line: #34363f; --soft: #26282f;
+  --ink: #f1efe9; --ink2: #c4c0b8; --ink3: #928e86;
+  --accent: #6fc7bd; --accent-ink: #10201f; --warm: #dda873; --stop: #e2917f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .2);
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    --bg: #15161a; --card: #1e2026; --line: #34363f; --soft: #26282f;
+    --ink: #f1efe9; --ink2: #c4c0b8; --ink3: #928e86;
+    --accent: #6fc7bd; --accent-ink: #10201f; --warm: #dda873; --stop: #e2917f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .2);
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 15px; line-height: 1.75; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 22px; }
+a { color: inherit; }
+.top { border-bottom: 1px solid var(--line); background: var(--card); }
+.top-in { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 60px; flex-wrap: wrap; }
+.brand { font-size: 16px; font-weight: 650; text-decoration: none; letter-spacing: .02em; }
+.brand span { font-weight: 400; color: var(--ink3); font-size: 12px; margin-left: 8px; }
+.tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--ink2); border-radius: 999px; padding: 4px 12px; font-size: 12px; text-decoration: none; cursor: pointer; font-family: inherit; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+
+.hero { padding: 64px 22px 40px; text-align: center; }
+.eyebrow { color: var(--accent); font-size: 12px; letter-spacing: .12em; margin: 0 0 12px; }
+.hero h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.25; margin: 0 0 16px; letter-spacing: -.01em; }
+.lede { max-width: 660px; margin: 0 auto; color: var(--ink2); font-size: 16px; }
+.cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 28px 0 14px; }
+.btn { display: inline-block; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 9px; padding: 10px 20px; font-size: 14px; text-decoration: none; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; }
+.meta { color: var(--ink3); font-size: 12px; margin: 0; }
+
+section.block { padding: 42px 0; border-top: 1px solid var(--line); }
+.block h2 { font-size: 22px; margin: 0 0 6px; }
+.block .sub { color: var(--ink3); font-size: 13px; margin: 0 0 24px; }
+
+.demo { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); gap: 12px; align-items: center; }
+@media (max-width: 760px) { .demo { grid-template-columns: 1fr; } .demo .flow { transform: rotate(90deg); text-align: center; } }
+.shot, .out { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; box-shadow: var(--shadow); }
+.bar { font-size: 11px; color: var(--ink3); border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 12px; }
+.bubble { max-width: 84%; border-radius: 10px; padding: 7px 11px; font-size: 13px; margin-bottom: 8px; background: var(--soft); }
+.bubble.left { margin-right: auto; }
+.bubble.right { margin-left: auto; background: color-mix(in srgb, var(--accent) 16%, var(--card)); }
+.flow { text-align: center; color: var(--accent); font-size: 20px; }
+.out .q { font-weight: 650; font-size: 13.5px; margin-bottom: 10px; }
+.out .r { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 8px; font-size: 12.5px; margin-top: 7px; }
+.out .r span { color: var(--ink3); }
+.out .r b { font-weight: 500; color: var(--ink2); }
+
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .grid3, .grid2 { grid-template-columns: 1fr; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
+.card h3 { margin: 0 0 8px; font-size: 15px; }
+.card p { margin: 0; color: var(--ink2); font-size: 13px; }
+.card .k { display: inline-block; font-size: 11px; color: var(--accent); border: 1px solid currentColor; border-radius: 4px; padding: 0 6px; margin-bottom: 10px; }
+.card.warn h3 { color: var(--stop); }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; font-size: 12.5px; line-height: 1.8; font-family: ui-monospace, Consolas, monospace; color: var(--ink2); }
+ul.notes { margin: 0; padding-left: 20px; color: var(--ink2); font-size: 13.5px; }
+ul.notes li { margin-bottom: 7px; }
+.foot { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--ink3); font-size: 12px; display: flex; gap: 12px; flex-wrap: wrap; }
+.foot a { color: var(--ink2); }
+</style>
 </head>
 <body>
-<div class="page">
 
-  <header class="masthead">
-    <div>
-      <h1>吵架翻译器 <span>聊天截图 / 对话回复</span></h1>
-      <p class="tagline">把指责翻成需求，把情绪翻成在意的东西。不劝和，不判对错。</p>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="./">吵架翻译器 <span>Quarrel Translator</span></a>
+    <nav class="tools">
+      <button class="chip" id="lang" type="button">EN</button>
+      <button class="chip" id="theme" type="button" data-zh="暗色" data-en="Dark">暗色</button>
+      <a class="chip" href="https://github.com/ytl1202/quarrel-translator">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero wrap">
+  <p class="eyebrow" data-zh="三份可以直接复制的大模型提示词" data-en="THREE REUSABLE LLM PROMPTS">三份可以直接复制的大模型提示词</p>
+  <h1 data-zh="把指责翻成需求" data-en="Translate blame into needs">把指责翻成需求</h1>
+  <p class="lede" data-zh="给它两个人的聊天记录或一张微信 / QQ 截图，它不劝和、不判对错，只逐句翻出情绪背后在要什么；也可以贴对方刚说的话，拿到 3 条能直接发出去的回复。" data-en="Give it a chat log or a WeChat / QQ screenshot. It does not mediate or take sides — it translates each line into what the person actually needs. You can also paste what the other person just said and get three ready-to-send replies.">给它两个人的聊天记录或一张微信 / QQ 截图，它不劝和、不判对错，只逐句翻出情绪背后在要什么；也可以贴对方刚说的话，拿到 3 条能直接发出去的回复。</p>
+  <div class="cta">
+    <a class="btn primary" href="./app.html" data-zh="打开在线工具" data-en="Open the tool">打开在线工具</a>
+    <a class="btn" href="https://github.com/ytl1202/quarrel-translator/releases/download/v0.1.0/quarrel-translator-v0.1.0-prompts.zip" data-zh="下载 v0.1.0 提示词包" data-en="Download v0.1.0 prompts">下载 v0.1.0 提示词包</a>
+    <a class="btn ghost" href="https://github.com/ytl1202/quarrel-translator" data-zh="在 GitHub 上 Star" data-en="Star on GitHub">在 GitHub 上 Star</a>
+  </div>
+  <p class="meta" data-zh="纯静态 · 零依赖 · 内置示例不需要 API Key · MIT" data-en="Static · Zero dependencies · Built-in demos need no API key · MIT">纯静态 · 零依赖 · 内置示例不需要 API Key · MIT</p>
+</section>
+
+<section class="block wrap">
+  <h2 data-zh="它在做什么" data-en="What it does">它在做什么</h2>
+  <p class="sub" data-zh="下面是仓库内置示例的真实输出形式（示例为中文原话）" data-en="A built-in example from the repository (sample lines are in Chinese)">下面是仓库内置示例的真实输出形式（示例为中文原话）</p>
+  <div class="demo">
+    <div class="shot">
+      <div class="bar" data-zh="输入 · 聊天截图 / 文字" data-en="INPUT · SCREENSHOT OR TEXT">输入 · 聊天截图 / 文字</div>
+      <div class="bubble left">你从来都不回我消息，你心里根本没我。</div>
+      <div class="bubble right">我上班忙，你能不能别无理取闹。</div>
+      <div class="bubble left">随便你吧</div>
     </div>
-    <span class="badge">静态页面 / 零依赖</span>
-  </header>
-
-  <nav class="tabs" role="tablist" aria-label="选择板块">
-    <button id="tab-shot" class="maintab active" type="button" role="tab" aria-selected="true">截图分析</button>
-    <button id="tab-reply" class="maintab" type="button" role="tab" aria-selected="false">对话回复</button>
-  </nav>
-
-  <details class="api-config" id="api-config">
-    <summary>模型接入设置（两个板块共用）</summary>
-    <div class="api-grid">
-      <div class="field">
-        <label class="field-label" for="base">Base URL</label>
-        <input id="base" type="text" placeholder="https://api.openai.com/v1" autocomplete="off">
-      </div>
-      <div class="field">
-        <label class="field-label" for="key">API Key</label>
-        <input id="key" type="password" placeholder="只留在当前页面，不保存" autocomplete="off">
-      </div>
-      <div class="field">
-        <label class="field-label" for="model">模型名</label>
-        <input id="model" type="text" placeholder="需支持图片输入，例如 gpt-4o-mini" autocomplete="off">
-      </div>
+    <div class="flow">→</div>
+    <div class="out">
+      <div class="bar" data-zh="输出 · 情绪 / 事实 / 需求" data-en="OUTPUT · EMOTION / FACT / NEED">输出 · 情绪 / 事实 / 需求</div>
+      <div class="q">【A】原话：你从来都不回我消息，你心里根本没我。</div>
+      <div class="r"><span>情绪</span><b>委屈（4/5）</b></div>
+      <div class="r"><span>事实</span><b>过去 24 小时有消息未获回复（需核对）</b></div>
+      <div class="r"><span>需求</span><b>我希望忙的时候给我一句「晚点回」</b></div>
+      <div class="r"><span>推测</span><b>怕的是「我不重要」，不是「你不回」</b></div>
     </div>
-    <p class="note warn">截图会以 base64 发往你所填的端点，先遮掉头像、昵称、手机号等敏感信息。截图分析要求模型支持图片输入（vision）；「对话回复」用普通文本模型即可。Key 只在当前页面内存，不写入本地存储；公共或共用电脑上不建议填真实 Key。浏览器直连第三方接口可能遇到跨域限制。</p>
-  </details>
+  </div>
+</section>
 
-  <main class="grid">
+<section class="block wrap">
+  <h2 data-zh="隐私与边界" data-en="Privacy and limits">隐私与边界</h2>
+  <p class="sub" data-zh="这三件事在使用前就该知道" data-en="Three things to know before you use it">这三件事在使用前就该知道</p>
+  <div class="grid3">
+    <div class="card warn">
+      <span class="k" data-zh="截图" data-en="SCREENSHOT">截图</span>
+      <h3 data-zh="图片会离开浏览器" data-en="Images leave the browser">图片会离开浏览器</h3>
+      <p data-zh="页面不做本地 OCR，截图以 base64 发往你自己填写的模型端点。发之前先遮掉头像、昵称、手机号。" data-en="No local OCR. Screenshots are sent as base64 to the endpoint you configure. Mask avatars, names and phone numbers first.">页面不做本地 OCR，截图以 base64 发往你自己填写的模型端点。发之前先遮掉头像、昵称、手机号。</p>
+    </div>
+    <div class="card warn">
+      <span class="k" data-zh="凭据" data-en="CREDENTIALS">凭据</span>
+      <h3 data-zh="Key 只在当前页面内存" data-en="Keys stay in memory">Key 只在当前页面内存</h3>
+      <p data-zh="不写入本地存储、不发往除你所填端点以外的地址。公共或共用电脑上不要填真实 Key。" data-en="Not written to storage, never sent anywhere except your endpoint. Do not use a real key on a shared computer.">不写入本地存储、不发往除你所填端点以外的地址。公共或共用电脑上不要填真实 Key。</p>
+    </div>
+    <div class="card warn">
+      <span class="k" data-zh="停机" data-en="HARD STOP">停机</span>
+      <h3 data-zh="有些对话不翻译" data-en="Some chats are not translated">有些对话不翻译</h3>
+      <p data-zh="命中人身威胁、自伤、涉及未成年人伤害、经济或社交控制时，立刻停机，只输出一句提示和简短原因。" data-en="Threats, self-harm, harm to minors, or coercive control trigger an immediate stop: one fixed sentence and a short reason.">命中人身威胁、自伤、涉及未成年人伤害、经济或社交控制时，立刻停机，只输出一句提示和简短原因。</p>
+    </div>
+  </div>
+</section>
 
-    <section class="panel" aria-labelledby="input-title">
-      <div class="panel-head">
-        <h2 id="input-title">输入</h2>
-        <span class="hint" id="pane-hint"></span>
-      </div>
+<section class="block wrap">
+  <h2 data-zh="六个特性" data-en="Six features">六个特性</h2>
+  <p class="sub" data-zh="全部是纯文本和静态页面，没有服务端" data-en="All plain text and static pages, no backend">全部是纯文本和静态页面，没有服务端</p>
+  <div class="grid3">
+    <div class="card"><h3 data-zh="三份提示词" data-en="Three prompts">三份提示词</h3><p data-zh="逐句翻译、聊天截图读图、推荐回复，各自独立可复制，按需组合。" data-en="Line-by-line translation, screenshot reading, and reply suggestions — copy whichever you need.">逐句翻译、聊天截图读图、推荐回复，各自独立可复制，按需组合。</p></div>
+    <div class="card"><h3 data-zh="截图读图" data-en="Screenshot reading">截图读图</h3><p data-zh="按气泡左右推断说话人并声明是推测，过滤时间戳与系统灰字，表情包单独解释。" data-en="Infers speakers from bubble position and flags it as a guess; skips timestamps and system lines; explains stickers separately.">按气泡左右推断说话人并声明是推测，过滤时间戳与系统灰字，表情包单独解释。</p></div>
+    <div class="card"><h3 data-zh="推荐回复" data-en="Reply suggestions">推荐回复</h3><p data-zh="克制版 / 直说需求版 / 先缓一缓版，每条附一句说明，可单独复制。" data-en="Reserved / direct / pause-first versions, each with one line of explanation and its own copy button.">克制版 / 直说需求版 / 先缓一缓版，每条附一句说明，可单独复制。</p></div>
+    <div class="card"><h3 data-zh="五条铁律" data-en="Five rules">五条铁律</h3><p data-zh="不站队、不脑补、不改事实、不诊断、不软化攻击性。" data-en="No side-taking, no mind-reading, no rewriting facts, no diagnosing, no softening threats.">不站队、不脑补、不改事实、不诊断、不软化攻击性。</p></div>
+    <div class="card"><h3 data-zh="停机优先" data-en="Stop comes first">停机优先</h3><p data-zh="安全红线命中时不逐句翻译、不给回复建议，也不下关系结论。" data-en="When a red line is hit: no translation, no reply suggestions, no verdict on the relationship.">安全红线命中时不逐句翻译、不给回复建议，也不下关系结论。</p></div>
+    <div class="card"><h3 data-zh="零依赖" data-en="Zero dependencies">零依赖</h3><p data-zh="没有框架、CDN 和构建步骤；双击 HTML 就能用，也可以直接用 GitHub Pages 发布。" data-en="No framework, CDN or build step. Double-click the HTML, or publish with GitHub Pages.">没有框架、CDN 和构建步骤；双击 HTML 就能用，也可以直接用 GitHub Pages 发布。</p></div>
+  </div>
+</section>
 
-      <div id="pane-shot">
-        <div class="drop" id="drop">
-          <p class="drop-title">把微信 / QQ 聊天截图拖进来，或直接 Ctrl+V 粘贴</p>
-          <label class="btn" for="file">选择图片</label>
-          <input id="file" type="file" accept="image/*" multiple hidden>
-          <p class="note">最多 4 张 · 长边压到 1600px 后发送 · 图片只发给你自己填的端点</p>
-        </div>
-        <div id="thumbs" class="thumbs"></div>
+<section class="block wrap">
+  <h2 data-zh="快速开始" data-en="Quick start">快速开始</h2>
+  <p class="sub" data-zh="不想配任何东西，就直接用在线工具里的内置示例" data-en="No setup needed for the built-in demos in the online tool">不想配任何东西，就直接用在线工具里的内置示例</p>
+  <pre># 1. 复制提示词到大模型的系统提示词位置
+SYSTEM_PROMPT.md          # 逐句翻译聊天记录
++ SCREENSHOT_PROMPT.md    # 输入是截图时，接在上面那份之后
+REPLY_PROMPT.md           # 想要推荐回复时，改用这一份
 
-        <div class="field">
-          <label class="field-label" for="shot-note">补充给模型的话（可选）</label>
-          <textarea id="shot-note" rows="3" spellcheck="false" placeholder="例如：这是我和对方的对话，右边是我"></textarea>
-        </div>
+# 2. 或者打开在线工具（内置示例不需要 API Key）
+https://ytl1202.github.io/quarrel-translator/app.html
 
-        <div class="field">
-          <label class="field-label" for="scope">翻译范围</label>
-          <select id="scope">
-            <option value="全翻">全翻</option>
-            <option value="只翻冲突最集中的几段">只翻冲突最集中的几段</option>
-          </select>
-          <p class="note">截图常常超过 6 条，先把范围告诉模型，就不用再追问一次。</p>
-        </div>
+# 3. 本地看源码
+git clone https://github.com/ytl1202/quarrel-translator.git</pre>
+</section>
 
-        <div class="field">
-          <label class="field-label" for="shot-sample">内置示例（不联网）</label>
-          <select id="shot-sample">
-            <option value="basic">基准示例（2 条）</option>
-            <option value="screenshot">聊天截图示例</option>
-            <option value="edge1">边界：未标说话人 / 语音转写 / 语气标记</option>
-            <option value="edge2">边界：脏话 / 非人身威胁</option>
-            <option value="six">超过 6 条消息 → 先追问</option>
-            <option value="stop">停机情形（不写具体原句）</option>
-          </select>
-        </div>
+<section class="block wrap">
+  <h2 data-zh="已知限制" data-en="Known limitations">已知限制</h2>
+  <div class="grid2" style="margin-top:20px">
+    <ul class="notes">
+      <li data-zh="截图板块需要模型支持图片输入，且端点要接受 data URL 形式的 base64 图片。" data-en="Screenshot analysis needs a vision-capable model and an endpoint that accepts base64 data URLs.">截图板块需要模型支持图片输入，且端点要接受 data URL 形式的 base64 图片。</li>
+      <li data-zh="图片里的内容无法做本地停机预检，词表兜底会漏也会误判。" data-en="Local red-line pre-checks cannot inspect images; the word list is only a fallback and can miss or over-trigger.">图片里的内容无法做本地停机预检，词表兜底会漏也会误判。</li>
+    </ul>
+    <ul class="notes">
+      <li data-zh="Pages 站点即使源仓库是私有的，也仍然公网可访问。" data-en="A GitHub Pages site is public even when its source repository is private.">Pages 站点即使源仓库是私有的，也仍然公网可访问。</li>
+      <li data-zh="规则内置示例的事实栏含演示占位数字；新增示例按更严格的规则文字书写。" data-en="The built-in sample contains placeholder numbers; newer examples follow the stricter rule wording.">规则内置示例的事实栏含演示占位数字；新增示例按更严格的规则文字书写。</li>
+    </ul>
+  </div>
+</section>
 
-        <div class="actions">
-          <button id="shot-run" class="btn primary" type="button">分析截图</button>
-          <button id="shot-demo" class="btn" type="button">看示例输出</button>
-        </div>
-      </div>
+<footer class="foot wrap">
+  <span>MIT License</span>
+  <span>·</span>
+  <a href="https://github.com/ytl1202/quarrel-translator" data-zh="仓库" data-en="Repository">仓库</a>
+  <span>·</span>
+  <a href="./app.html" data-zh="在线工具" data-en="Online tool">在线工具</a>
+  <span>·</span>
+  <a href="https://github.com/ytl1202/quarrel-translator/releases" data-zh="下载与更新记录" data-en="Releases">下载与更新记录</a>
+</footer>
 
-      <div id="pane-reply" hidden>
-        <div class="field">
-          <label class="field-label" for="reply-input">对方刚说的话</label>
-          <textarea id="reply-input" rows="7" spellcheck="false" placeholder="把对方刚发的那句话贴进来&#10;例如：你心里根本没我，消息从来都不回。"></textarea>
-          <p class="note" id="reply-hint">0 字</p>
-        </div>
+<script>
+(function () {
+  var nodes = document.querySelectorAll('[data-zh]');
+  var lang = 'zh';
+  function applyLang(l) {
+    lang = l;
+    nodes.forEach(function (n) { n.textContent = l === 'en' ? n.getAttribute('data-en') : n.getAttribute('data-zh'); });
+    document.documentElement.lang = l === 'en' ? 'en' : 'zh-CN';
+    document.getElementById('lang').textContent = l === 'en' ? '中文' : 'EN';
+  }
+  document.getElementById('lang').addEventListener('click', function () { applyLang(lang === 'zh' ? 'en' : 'zh'); });
 
-        <div class="field">
-          <label class="field-label" for="reply-context">我想表达什么（可选）</label>
-          <textarea id="reply-context" rows="3" spellcheck="false" placeholder="例如：我确实在忙，但不是故意不回"></textarea>
-          <p class="note">这一栏只用来贴你自己的意思，不会被当成对方说过的话。</p>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="reply-sample">内置示例（不联网）</label>
-          <select id="reply-sample">
-            <option value="normal">常规示例（3 条回复）</option>
-            <option value="violation">含禁止句式的输出（看校验提示）</option>
-            <option value="stop">停机情形（不写具体原句）</option>
-          </select>
-        </div>
-
-        <div class="actions">
-          <button id="reply-run" class="btn primary" type="button">生成推荐回复</button>
-          <button id="reply-demo" class="btn" type="button">看示例输出</button>
-        </div>
-      </div>
-
-      <p class="toast" id="toast" role="status" aria-live="polite"></p>
-    </section>
-
-    <section class="panel" aria-labelledby="output-title">
-      <div class="panel-head">
-        <h2 id="output-title">输出</h2>
-        <div class="view-switch" role="group" aria-label="输出视图">
-          <button id="tab-fmt" class="tab active" type="button">格式化</button>
-          <button id="tab-raw" class="tab" type="button">原始文本</button>
-        </div>
-      </div>
-
-      <div class="status" id="status" role="status" aria-live="polite">就绪</div>
-      <div id="fmt" class="result"></div>
-      <pre id="raw" class="raw" hidden></pre>
-
-      <details class="prompt-view">
-        <summary>查看 / 复制当前板块的提示词</summary>
-        <div class="actions"><button id="copy-prompt" class="btn" type="button">复制提示词 + 当前输入</button></div>
-        <pre id="prompt-text"></pre>
-      </details>
-
-      <p class="footnote">页面只做展示：停机预检是本地词表兜底，词表不完整，未命中不代表安全；禁止句式校验也是本地检查，最终以仓库里的规则原文为准。</p>
-    </section>
-
-  </main>
-
-  <footer class="sitefoot">
-    <span>内置示例不联网；截图只发往你所填的端点</span>
-    <span>·</span>
-    <span id="prompt-source">提示词来源：内置副本</span>
-  </footer>
-
-</div>
-<script src="data.js"></script>
-<script src="app.js"></script>
+  var themeBtn = document.getElementById('theme');
+  function systemDark() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  var forced = null;
+  function label() {
+    var dark = forced === 'dark' || (forced === null && systemDark());
+    themeBtn.textContent = dark ? (lang === 'en' ? 'Light' : '浅色') : (lang === 'en' ? 'Dark' : '暗色');
+  }
+  themeBtn.addEventListener('click', function () {
+    var dark = forced === 'dark' || (forced === null && systemDark());
+    forced = dark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', forced);
+    label();
+  });
+  document.getElementById('lang').addEventListener('click', label);
+  label();
+})();
+</script>
 </body>
 </html>
